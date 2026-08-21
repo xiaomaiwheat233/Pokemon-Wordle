@@ -333,7 +333,7 @@
   }
 
   function arrowOf(diff) {
-    return diff === 0 ? '' : (diff > 0 ? '↑' : '↓');
+    return diff === 0 ? '' : (diff > 0 ? '↓' : '↑');
   }
 
   function clsOf(diff, closeThr) {
