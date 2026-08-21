@@ -397,6 +397,7 @@ td.col-type .type-chips { justify-content: flex-start; }
   .target-box { flex: none; min-height: 200px; }
   .target-img { max-height: 150px; }
   .target-img-wrap { min-height: 150px; }
+  .target-overlay { left: 50%; } /* 移动端「？」保持居中（PC 端为 58%） */
   .logo h1 { font-size: 22px; }
   .attempt-info { margin-left: 0; }
 
@@ -404,7 +405,7 @@ td.col-type .type-chips { justify-content: flex-start; }
   .table-wrap { max-height: none; overflow: visible; padding: 12px; }
   table { min-width: 0; display: block; }
   thead { display: none; }
-  tbody { display: block; }
+  tbody { display: flex; flex-direction: column-reverse; } /* 倒序：最新猜测在最上面 */
   tbody tr {
     display: block;
     border: 1px solid var(--line);
@@ -415,6 +416,7 @@ td.col-type .type-chips { justify-content: flex-start; }
     overflow: hidden;
   }
   tbody tr:last-child { margin-bottom: 0; }
+  tbody tr:first-child { margin-bottom: 0; } /* 倒序排列时，最底下的一行不再留间距 */
   tbody td {
     display: flex;
     align-items: center;
