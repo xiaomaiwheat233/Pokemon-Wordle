@@ -25,24 +25,31 @@
         <label class="setup-label">选择世代：</label>
         <div id="gen-buttons" class="gen-buttons"></div>
       </div>
+      <div class="setup-row">
+        <label class="setup-label">难度模式：</label>
+        <div id="diff-buttons" class="gen-buttons"></div>
+      </div>
       <div class="setup-row controls">
         <button id="btn-start" class="btn btn-primary">🎯 开始竞猜</button>
-        <span class="setup-note">开始后将隐藏此面板；游戏中可随时「🏳️ 放弃」，或使用一次「💡 提示」（三选一，每局限一次）</span>
+        <span class="setup-note" id="diff-note"></span>
       </div>
     </section>
 
     <!-- 游戏中控制栏：提示 / 放弃 -->
     <section class="card game-controls hidden" id="game-controls">
-      <div id="attempt-info" class="attempt-info">剩余次数 <b id="attempt-left">8</b> / 8</div>
+      <div class="attempt-info">
+        剩余次数 <b id="attempt-left">8</b> / 8
+        <span class="mode-tag" id="mode-tag"></span>
+      </div>
       <div class="controls-right">
-        <div class="hint-wrap">
+        <div class="hint-wrap" id="hint-wrap">
           <button id="btn-hint" class="btn btn-hint">💡 提示 <span class="caret">▾</span></button>
           <div id="hint-menu" class="hint-menu">
             <button class="hint-item" id="hint-length">🔤 名字字数
               <span class="hint-item-desc">答案的名字共几个字</span>
             </button>
-            <button class="hint-item" id="hint-first">🀄 名字第一个字
-              <span class="hint-item-desc">答案名字的第一个字</span>
+            <button class="hint-item" id="hint-fields">📋 揭示 3 个词条
+              <span class="hint-item-desc">公布答案的 3 项数据，优先给还未猜中的词条</span>
             </button>
             <button class="hint-item" id="hint-fill">🎲 自动填入宝可梦
               <span class="hint-item-desc">随机填入一只 ≥ 半数数据吻合的宝可梦（消耗一次竞猜）</span>
@@ -52,8 +59,7 @@
         </div>
         <button id="btn-giveup" class="btn btn-giveup">🏳️ 放弃</button>
       </div>
-    </section>
-
+    </section>  
     <!-- 神秘宝可梦 + 猜测输入 -->
     <section class="card play-area">
       <div class="target-box">
@@ -120,8 +126,13 @@
         <li>数值型数据（种族值、世代、进化段数）附 <b>↑</b> 表示答案高于你猜的宝可梦、<b>↓</b> 表示答案低于你猜的宝可梦。</li>
         <li>属性按「集合」比较，双属性顺序不影响判断；完全一致为绿色，只中一个为黄色。</li>
         <li>特性列中「(隐)」表示隐藏特性；与答案拥有任意相同特性即为绿色。</li>
-        <li>目标剪影图不会一开始给出，进行到<b>最后一次竞猜</b>时才会显示。</li>
-        <li>游戏中可点击「🏳️ 放弃」直接公布答案，或使用一次「💡 提示」（三选一，每局限用一次）：名字字数、名字第一个字、自动填入一只 ≥ 半数数据吻合的宝可梦（消耗一次竞猜机会）。</li>
+        <li><b>难度模式</b>：
+          <b>简单</b> = 保留全部功能（最后一次竞猜给出剪影图 + 可用提示）；
+          <b>普通</b> = 不提供剪影图，仍可用提示；
+          <b>困难</b> = 不提供剪影图，且无法使用提示。</li>
+        <li>简单模式下目标剪影图不会一开始给出，进行到<b>最后一次竞猜</b>时才会显示。</li>
+        <li>游戏中可随时点击「🏳️ 放弃」直接公布答案（各难度均可用）。</li>
+        <li>「💡 提示」三选一、每局限用一次（困难模式不可用）：<b>名字字数</b>、<b>揭示 3 个词条</b>（公布答案的 3 项数据，优先给你还没猜中的词条）、<b>自动填入宝可梦</b>（随机填入一只 ≥ 半数数据吻合的宝可梦，消耗一次竞猜机会）。</li>
         <li>最多猜测 <b>8</b> 次，猜中即获胜；未猜中会公布正确答案。</li>
       </ul>
     </section>

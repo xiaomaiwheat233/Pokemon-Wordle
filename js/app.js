@@ -26,12 +26,56 @@
     '钢': '#B8B8D0', '妖精': '#EE99AC',
   };
 
+  // 难度模式：简单 = 全功能；普通 = 无剪影；困难 = 无剪影且无提示
+  const MODE_ORDER = ['easy', 'normal', 'hard'];
+  const MODES = {
+    easy: {
+      name: '简单', silhouette: true, hints: true,
+      desc: '保留全部功能：最后一次竞猜给出剪影图，可使用「💡 提示」',
+    },
+    normal: {
+      name: '普通', silhouette: false, hints: true,
+      desc: '不提供剪影图，仍可使用一次「💡 提示」',
+    },
+    hard: {
+      name: '困难', silhouette: false, hints: false,
+      desc: '不提供剪影图，且无法使用「💡 提示」，只能靠反馈推理',
+    },
+  };
+
+  // 可比较的 12 个词条：定义在一处，供反馈表判定、吻合度统计、词条提示共用
+  function sameTypes(p, t) {
+    return p.types.length === t.types.length &&
+      p.types.every(function (x) { return t.types.indexOf(x) !== -1; });
+  }
+  function sharesAbility(p, t) {
+    var tAb = t.abilities.concat(t.hiddenAbilities);
+    return p.abilities.concat(p.hiddenAbilities).some(function (a) { return tAb.indexOf(a) !== -1; });
+  }
+  const FIELDS = [
+    { key: 'hp', label: 'HP', answer: function (t) { return t.hp; }, correct: function (p, t) { return p.hp === t.hp; } },
+    { key: 'atk', label: '攻击', answer: function (t) { return t.atk; }, correct: function (p, t) { return p.atk === t.atk; } },
+    { key: 'def', label: '防御', answer: function (t) { return t.def; }, correct: function (p, t) { return p.def === t.def; } },
+    { key: 'spa', label: '特攻', answer: function (t) { return t.spa; }, correct: function (p, t) { return p.spa === t.spa; } },
+    { key: 'spd', label: '特防', answer: function (t) { return t.spd; }, correct: function (p, t) { return p.spd === t.spd; } },
+    { key: 'spe', label: '速度', answer: function (t) { return t.spe; }, correct: function (p, t) { return p.spe === t.spe; } },
+    { key: 'total', label: '种族值合计', answer: function (t) { return t.total; }, correct: function (p, t) { return p.total === t.total; } },
+    { key: 'types', label: '属性', answer: function (t) { return t.types.join('/'); }, correct: sameTypes },
+    { key: 'gen', label: '世代', answer: function (t) { return GEN_NAMES[t.gen]; }, correct: function (p, t) { return p.gen === t.gen; } },
+    { key: 'ability', label: '特性', answer: function (t) { return t.abilities.concat(t.hiddenAbilities).join('、'); }, correct: sharesAbility },
+    { key: 'stage', label: '进化段数', answer: function (t) { return t.stage + ' 段'; }, correct: function (p, t) { return p.stage === t.stage; } },
+    { key: 'mega', label: 'Mega', answer: function (t) { return t.canMega ? '可Mega' : '不可'; }, correct: function (p, t) { return p.canMega === t.canMega; } },
+  ];
+  const REVEAL_COUNT = 3; // 「揭示词条」一次给出的词条数
+
   // ---------- 状态 ----------
   const state = {
     target: null,     // 本轮答案
     guesses: [],      // 已猜的宝可梦
     over: false,      // 本轮是否结束
     genSel: 0,        // 0 = 全部世代
+    diffSel: 'easy',  // 设置面板中选中的难度
+    mode: 'easy',     // 本局生效的难度（开始竞猜时锁定）
     imgOk: true,      // 目标图片是否加载成功
     hintUsed: false,  // 本局是否已用过提示（每局限一次）
   };
@@ -47,14 +91,18 @@
   // ---------- DOM ----------
   var $ = function (id) { return document.getElementById(id); };
   var genButtonsEl = $('gen-buttons');
+  var diffButtonsEl = $('diff-buttons');
+  var diffNote = $('diff-note');
+  var modeTag = $('mode-tag');
   var btnStart = $('btn-start');
   var setupCard = $('setup-card');
   var gameControls = $('game-controls');
+  var hintWrap = $('hint-wrap');
   var btnHint = $('btn-hint');
   var hintMenu = $('hint-menu');
   var btnGiveup = $('btn-giveup');
   var hintLength = $('hint-length');
-  var hintFirst = $('hint-first');
+  var hintFields = $('hint-fields');
   var hintFill = $('hint-fill');
   var hintInfo = $('hint-info');
   var attemptLeftEl = $('attempt-left');
@@ -108,6 +156,25 @@
     return sel === 0 ? DATA : DATA.filter(function (p) { return p.gen === sel; });
   }
 
+  // ---------- 难度选择 ----------
+  function renderDiffButtons() {
+    MODE_ORDER.forEach(function (key) {
+      var m = MODES[key];
+      var btn = document.createElement('button');
+      btn.className = 'gen-btn' + (key === state.diffSel ? ' selected' : '');
+      btn.textContent = m.name;
+      btn.title = m.desc;
+      btn.addEventListener('click', function () {
+        state.diffSel = key;
+        diffButtonsEl.querySelectorAll('.gen-btn').forEach(function (b) { b.classList.remove('selected'); });
+        btn.classList.add('selected');
+        diffNote.textContent = m.name + '模式：' + m.desc;
+      });
+      diffButtonsEl.appendChild(btn);
+    });
+    diffNote.textContent = MODES[state.diffSel].name + '模式：' + MODES[state.diffSel].desc;
+  }
+
   // ---------- 开始竞猜 ----------
   function startGame() {
     var pool = poolFor(state.genSel);
@@ -116,13 +183,24 @@
     state.over = false;
     state.imgOk = true;
     state.hintUsed = false;
-    btnHint.disabled = false;
+    state.mode = state.diffSel; // 本局难度锁定
+
+    // 困难模式：整局隐藏提示按钮
+    if (MODES[state.mode].hints) {
+      hintWrap.classList.remove('hidden');
+      btnHint.disabled = false;
+    } else {
+      hintWrap.classList.add('hidden');
+      btnHint.disabled = true;
+    }
 
     // 隐藏设置面板，显示游戏中控制栏
     setupCard.classList.add('hidden');
     gameControls.classList.remove('hidden');
     hintMenu.classList.remove('open');
     hintInfo.innerHTML = '';
+    modeTag.textContent = MODES[state.mode].name + '模式';
+    modeTag.dataset.mode = state.mode;
 
     // 重置反馈表
     tbody.innerHTML = '';
@@ -164,6 +242,12 @@
 
   function updateSilhouette() {
     if (state.over || !state.target) return;
+    // 普通/困难模式：不提供剪影
+    if (!MODES[state.mode].silhouette) {
+      setTargetVisual('none');
+      targetStatus.textContent = MODES[state.mode].name + '模式：本局不提供剪影图';
+      return;
+    }
     var remaining = MAX_GUESSES - state.guesses.length;
     if (remaining <= 1) {
       setTargetVisual('silhouette');
@@ -465,6 +549,10 @@
       toast('请先开始竞猜');
       return;
     }
+    if (!MODES[state.mode].hints) {
+      toast('困难模式无法使用提示');
+      return;
+    }
     if (state.hintUsed) {
       toast('本局提示已用完（每局限一次）');
       return;
@@ -483,6 +571,10 @@
   function useHint(type) {
     hintMenu.classList.remove('open');
     if (!state.target || state.over) return;
+    if (!MODES[state.mode].hints) {
+      toast('困难模式无法使用提示');
+      return;
+    }
     if (state.hintUsed) {
       toast('本局提示已用完（每局限一次）');
       return;
@@ -492,35 +584,51 @@
     var t = state.target;
     if (type === 'length') {
       showHint('💡 名字共 ' + Array.from(t.name).length + ' 个字');
-    } else if (type === 'first') {
-      showHint('💡 名字第一个字是「' + Array.from(t.name)[0] + '」');
+    } else if (type === 'fields') {
+      revealFieldsHint();
     } else if (type === 'fill') {
       autoFillGuess();
     }
   }
   hintLength.addEventListener('click', function () { useHint('length'); });
-  hintFirst.addEventListener('click', function () { useHint('first'); });
+  hintFields.addEventListener('click', function () { useHint('fields'); });
   hintFill.addEventListener('click', function () { useHint('fill'); });
 
-  // 与答案的数据吻合项数（13 项：6 维种族值、合计、属性、世代、特性、进化段数、Mega）
+  // 「揭示 3 个词条」：优先公布你还没有猜中过（绿色）的词条
+  function unrevealedFields() {
+    var t = state.target;
+    return FIELDS.filter(function (f) {
+      return !state.guesses.some(function (g) { return f.correct(g, t); });
+    });
+  }
+
+  function revealFieldsHint() {
+    var cands = unrevealedFields();
+    if (cands.length === 0) {
+      showHint('💡 全部词条都已被你猜中过，无需揭示！');
+      return;
+    }
+    // 随机取 3 个（不足 3 个则全部给出）
+    var picked = [];
+    for (var i = 0; i < REVEAL_COUNT && cands.length > 0; i++) {
+      picked.push(cands.splice(Math.floor(Math.random() * cands.length), 1)[0]);
+    }
+    picked.forEach(function (f) {
+      showHint('💡 ' + f.label + '：' + f.answer(state.target));
+    });
+  }
+
+  // 与答案的数据吻合项数（与反馈表一致的 12 个词条）
   function countMatches(p, t) {
     var n = 0;
-    STAT_COLS.forEach(function (c) { if (p[c[0]] === t[c[0]]) n++; });
-    if (p.total === t.total) n++;
-    if (p.types.length === t.types.length && p.types.every(function (x) { return t.types.indexOf(x) !== -1; })) n++;
-    if (p.gen === t.gen) n++;
-    var tAb = t.abilities.concat(t.hiddenAbilities);
-    var shared = p.abilities.concat(p.hiddenAbilities).some(function (a) { return tAb.indexOf(a) !== -1; });
-    if (shared) n++;
-    if (p.stage === t.stage) n++;
-    if (p.canMega === t.canMega) n++;
+    FIELDS.forEach(function (f) { if (f.correct(p, t)) n++; });
     return n;
   }
 
   // 随机填入一只 ≥ 半数数据吻合的宝可梦（排除答案本身与已猜过的），消耗一次竞猜
   function autoFillGuess() {
     var t = state.target;
-    var need = Math.ceil(13 / 2);
+    var need = Math.ceil(FIELDS.length / 2);
     var pool = poolFor(state.genSel).filter(function (p) {
       return p.id !== t.id && !state.guesses.some(function (g) { return g.id === p.id; });
     });
@@ -536,13 +644,14 @@
       best = pool.filter(function (p) { return countMatches(p, t) === bestN; });
     }
     var c = best[Math.floor(Math.random() * best.length)];
-    showHint('💡 已自动填入「' + c.name + '」（' + countMatches(c, t) + '/13 项吻合）');
+    showHint('💡 已自动填入「' + c.name + '」（' + countMatches(c, t) + '/' + FIELDS.length + ' 项吻合）');
     pickPokemon(c);
   }
 
   // ---------- 初始化 ----------
   btnStart.addEventListener('click', startGame);
   renderGenButtons();
+  renderDiffButtons();
   updateTableVisibility();
   updateAttempts();
   targetStatus.textContent = '点击「开始竞猜」抽取目标';

@@ -104,6 +104,20 @@ main { max-width: 1200px; margin: 0 auto; padding: 20px 16px 40px; }
 }
 .attempt-info b { font-size: 20px; color: var(--red); margin: 0 2px; }
 
+/* 难度标签 */
+.mode-tag {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 1px 10px;
+  border-radius: 12px;
+  vertical-align: middle;
+}
+.mode-tag[data-mode="easy"] { color: #15803d; background: #dcfce7; border: 1px solid #bbf7d0; }
+.mode-tag[data-mode="normal"] { color: #b45309; background: #fef3c7; border: 1px solid #fde68a; }
+.mode-tag[data-mode="hard"] { color: #b91c1c; background: #fee2e2; border: 1px solid #fecaca; }
+
 .setup-note { color: var(--muted); font-size: 13px; }
 
 /* ============ 游戏中控制栏 ============ */
