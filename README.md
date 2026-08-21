@@ -14,12 +14,6 @@
 
 纯静态页面，无需构建：直接用浏览器打开 `[index.html](https://xiaomaiwheat233.github.io/Pokemon-Wordle/)` 即可。
 
-开发相关：
-
-```bash
-python tools/build_data.py   # 从 pokemon-dataset-zh 数据重新生成 js/pokedex-data.js
-node tools/test_logic.js     # 无头逻辑测试（模拟完整对局流程）
-```
 
 ## 📊 数据来源与致谢
 
