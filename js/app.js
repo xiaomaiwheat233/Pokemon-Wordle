@@ -33,6 +33,7 @@
     over: false,      // 本轮是否结束
     genSel: 0,        // 0 = 全部世代
     imgOk: true,      // 目标图片是否加载成功
+    hintUsed: false,  // 本局是否已用过提示（每局限一次）
   };
 
   // 名称索引（中文 + 英文小写）
@@ -114,6 +115,8 @@
     state.guesses = [];
     state.over = false;
     state.imgOk = true;
+    state.hintUsed = false;
+    btnHint.disabled = false;
 
     // 隐藏设置面板，显示游戏中控制栏
     setupCard.classList.add('hidden');
@@ -147,12 +150,12 @@
     var hasImg = !!(t && t.img && state.imgOk);
     if (!hasImg || mode === 'none') {
       // 无图或尚未到给出剪影的时机：只显示「？」
-      targetImg.style.display = 'none';
+      targetImg.classList.add('hidden');
       targetImg.classList.remove('silhouette', 'reveal');
       targetOverlay.classList.remove('hidden');
       return;
     }
-    targetImg.style.display = '';
+    targetImg.classList.remove('hidden');
     targetImg.src = t.img;
     targetImg.classList.toggle('silhouette', mode === 'silhouette');
     targetImg.classList.toggle('reveal', mode === 'reveal');
@@ -173,7 +176,7 @@
 
   targetImg.addEventListener('error', function () {
     state.imgOk = false;
-    targetImg.style.display = 'none';
+    targetImg.classList.add('hidden');
     targetOverlay.classList.remove('hidden');
     if (!state.over) updateSilhouette();
   });
@@ -333,7 +336,7 @@
   }
 
   function arrowOf(diff) {
-    return diff === 0 ? '' : (diff > 0 ? '↑' : '↓');
+    return diff === 0 ? '' : (diff > 0 ? '↓' : '↑');
   }
 
   function clsOf(diff, closeThr) {
@@ -345,8 +348,8 @@
   function statCell(gVal, tVal, closeThr, suffix, title) {
     var diff = gVal - tVal;
     var arrow = arrowOf(diff);
-    var html = '<span class="cell-value">' + gVal + (suffix || '') + '</span>' +
-      (arrow ? '<span class="arrow">' + arrow + '</span>' : '');
+    var html = '<span class="cell-body"><span class="cell-value">' + gVal + (suffix || '') + '</span>' +
+      (arrow ? '<span class="arrow">' + arrow + '</span>' : '') + '</span>';
     return makeCell(clsOf(diff, closeThr), html, title);
   }
 
@@ -388,8 +391,8 @@
     var gDiff = entry.gen - t.gen;
     var gArrow = arrowOf(gDiff);
     tr.appendChild(makeCell(clsOf(gDiff, 1),
-      '<span class="cell-value">' + GEN_NAMES[entry.gen] + '</span>' +
-      (gArrow ? '<span class="arrow">' + gArrow + '</span>' : '')));
+      '<span class="cell-body"><span class="cell-value">' + GEN_NAMES[entry.gen] + '</span>' +
+      (gArrow ? '<span class="arrow">' + gArrow + '</span>' : '') + '</span>'));
 
     // 特性
     var tAb = new Set(t.abilities.concat(t.hiddenAbilities));
@@ -462,6 +465,10 @@
       toast('请先开始竞猜');
       return;
     }
+    if (state.hintUsed) {
+      toast('本局提示已用完（每局限一次）');
+      return;
+    }
     hintMenu.classList.toggle('open');
   });
 
@@ -476,6 +483,12 @@
   function useHint(type) {
     hintMenu.classList.remove('open');
     if (!state.target || state.over) return;
+    if (state.hintUsed) {
+      toast('本局提示已用完（每局限一次）');
+      return;
+    }
+    state.hintUsed = true;
+    btnHint.disabled = true;
     var t = state.target;
     if (type === 'length') {
       showHint('💡 名字共 ' + Array.from(t.name).length + ' 个字');

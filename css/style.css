@@ -121,7 +121,13 @@ main { max-width: 1200px; margin: 0 auto; padding: 20px 16px 40px; }
   box-shadow: 0 3px 10px rgba(37, 99, 235, .3);
   padding: 11px 18px;
 }
-.btn-hint:hover { background: linear-gradient(135deg, #2563eb, #1d4ed8); transform: translateY(-1px); }
+.btn-hint:not(:disabled):hover { background: linear-gradient(135deg, #2563eb, #1d4ed8); transform: translateY(-1px); }
+.btn-hint:disabled {
+  background: #cbd5e1;
+  color: #64748b;
+  box-shadow: none;
+  cursor: not-allowed;
+}
 .btn-hint .caret { font-size: 11px; margin-left: 4px; }
 
 .btn-giveup {
@@ -159,6 +165,15 @@ main { max-width: 1200px; margin: 0 auto; padding: 20px 16px 40px; }
   margin-top: 2px;
 }
 
+.hint-menu-note {
+  margin-top: 4px;
+  padding: 7px 12px 3px;
+  border-top: 1px dashed var(--line);
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
 .hint-info { display: flex; flex-wrap: wrap; gap: 6px; }
 .hint-chip {
   background: #eff6ff; color: #1d4ed8;
@@ -182,7 +197,11 @@ main { max-width: 1200px; margin: 0 auto; padding: 20px 16px 40px; }
   min-height: 250px;
   position: relative;
 }
-.target-img-wrap { position: relative; width: 100%; display: flex; justify-content: center; }
+.target-img-wrap {
+  position: relative; width: 100%;
+  display: flex; justify-content: center; align-items: center;
+  min-height: 190px; /* 图片隐藏时保持高度，让「？」居中 */
+}
 .target-img {
   max-width: 100%;
   max-height: 190px;
@@ -194,7 +213,7 @@ main { max-width: 1200px; margin: 0 auto; padding: 20px 16px 40px; }
 .target-img.reveal { filter: brightness(1); }
 
 .target-overlay {
-  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  position: absolute; top: 50%; left: 58%; transform: translate(-50%, -50%);
   font-size: 72px; font-weight: 700; color: rgba(31, 41, 55, .25);
   pointer-events: none;
 }
@@ -254,6 +273,8 @@ main { max-width: 1200px; margin: 0 auto; padding: 20px 16px 40px; }
   transition: transform .3s ease;
   z-index: 100;
   pointer-events: none;
+  max-width: calc(100vw - 32px); /* 防止长文案溢出屏幕 */
+  text-align: center;
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 
@@ -326,6 +347,7 @@ td.col-poke, th.col-poke {
 .cell .arrow { display: inline-block; margin-left: 3px; font-weight: 700; }
 .cell-correct .arrow { display: none; }
 .cell-value { font-variant-numeric: tabular-nums; }
+.cell-body { display: inline-flex; align-items: baseline; }
 
 td.col-type, td.col-ability { text-align: left; min-width: 150px; }
 td.col-ability { font-size: 13px; white-space: normal; min-width: 170px; }
@@ -371,9 +393,73 @@ td.col-type .type-chips { justify-content: flex-start; }
 
 /* ============ 响应式 ============ */
 @media (max-width: 760px) {
-  .play-area { flex-direction: column; }
+  .play-area { flex-direction: column; gap: 14px; }
   .target-box { flex: none; min-height: 200px; }
   .target-img { max-height: 150px; }
+  .target-img-wrap { min-height: 150px; }
   .logo h1 { font-size: 22px; }
   .attempt-info { margin-left: 0; }
+
+  /* 反馈表改为卡片式纵向布局，避免横向滚动 */
+  .table-wrap { max-height: none; overflow: visible; padding: 12px; }
+  table { min-width: 0; display: block; }
+  thead { display: none; }
+  tbody { display: block; }
+  tbody tr {
+    display: block;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, .05);
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  tbody tr:last-child { margin-bottom: 0; }
+  tbody td {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 14px;
+    text-align: left;
+    font-size: 14px;
+    white-space: normal;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  tbody tr td:last-child { border-bottom: none; }
+
+  /* 每行左侧的字段标签（第 1 列宝可梦卡头除外） */
+  tbody td::before {
+    content: none;
+    margin-right: auto;
+    font-size: 12px;
+    font-weight: 600;
+    color: inherit;
+    opacity: .7;
+    flex: none;
+  }
+  tbody td:nth-child(2)::before { content: "HP"; }
+  tbody td:nth-child(3)::before { content: "攻击"; }
+  tbody td:nth-child(4)::before { content: "防御"; }
+  tbody td:nth-child(5)::before { content: "特攻"; }
+  tbody td:nth-child(6)::before { content: "特防"; }
+  tbody td:nth-child(7)::before { content: "速度"; }
+  tbody td:nth-child(8)::before { content: "合计"; }
+  tbody td:nth-child(9)::before { content: "属性"; }
+  tbody td:nth-child(10)::before { content: "世代"; }
+  tbody td:nth-child(11)::before { content: "特性"; }
+  tbody td:nth-child(12)::before { content: "进化段数"; }
+  tbody td:nth-child(13)::before { content: "Mega"; }
+
+  /* 第一列：作为卡片头部的宝可梦信息 */
+  td.col-poke, th.col-poke {
+    position: static;
+    min-width: 0;
+    box-shadow: none;
+    display: block;
+    background: #f9fafb;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  td.col-type, td.col-ability { min-width: 0; }
+  td.col-ability { align-items: flex-start; }
 }

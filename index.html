@@ -27,7 +27,7 @@
       </div>
       <div class="setup-row controls">
         <button id="btn-start" class="btn btn-primary">🎯 开始竞猜</button>
-        <span class="setup-note">开始后将隐藏此面板；游戏中可随时「🏳️ 放弃」或使用「💡 提示」</span>
+        <span class="setup-note">开始后将隐藏此面板；游戏中可随时「🏳️ 放弃」，或使用一次「💡 提示」（三选一，每局限一次）</span>
       </div>
     </section>
 
@@ -47,6 +47,7 @@
             <button class="hint-item" id="hint-fill">🎲 自动填入宝可梦
               <span class="hint-item-desc">随机填入一只 ≥ 半数数据吻合的宝可梦（消耗一次竞猜）</span>
             </button>
+            <div class="hint-menu-note">每局限用一次 · 三选一</div>
           </div>
         </div>
         <button id="btn-giveup" class="btn btn-giveup">🏳️ 放弃</button>
@@ -57,7 +58,7 @@
     <section class="card play-area">
       <div class="target-box">
         <div class="target-img-wrap">
-          <img id="target-img" class="target-img" alt="神秘宝可梦" draggable="false">
+          <img id="target-img" class="target-img hidden" alt="神秘宝可梦" draggable="false">
           <div id="target-overlay" class="target-overlay">？</div>
         </div>
         <div id="target-status" class="target-status">点击「开始竞猜」抽取目标</div>
@@ -102,7 +103,7 @@
         <div id="empty-hint" class="empty-hint">
           <span class="empty-emoji">🔍</span>
           <p>开始竞猜后，每一次猜测都会显示数值反馈：<br>
-          <b>绿色</b> = 正确 · <b>黄色</b> = 接近 · <b>灰色</b> = 不对 · <b>↑</b> 高于答案 · <b>↓</b> 低于答案</p>
+          <b>绿色</b> = 正确 · <b>黄色</b> = 接近 · <b>灰色</b> = 不对 · <b>↑</b> 答案更高 · <b>↓</b> 答案更低</p>
         </div>
       </div>
     </section>
@@ -116,11 +117,11 @@
         <li><span class="badge badge-green">绿色底</span> 该项数据正确（与答案一致）。</li>
         <li><span class="badge badge-yellow">黄色底</span> 该项数据接近：种族值相差 ≤ 10（合计 ≤ 15）、世代相邻、进化段数相差 1、属性部分相同。</li>
         <li><span class="badge badge-gray">灰色底</span> 该项数据与答案不同。</li>
-        <li>数值型数据（种族值、世代、进化段数）附 <b>↑</b> 表示你猜的高于答案、<b>↓</b> 表示低于答案。</li>
+        <li>数值型数据（种族值、世代、进化段数）附 <b>↑</b> 表示答案高于你猜的宝可梦、<b>↓</b> 表示答案低于你猜的宝可梦。</li>
         <li>属性按「集合」比较，双属性顺序不影响判断；完全一致为绿色，只中一个为黄色。</li>
         <li>特性列中「(隐)」表示隐藏特性；与答案拥有任意相同特性即为绿色。</li>
         <li>目标剪影图不会一开始给出，进行到<b>最后一次竞猜</b>时才会显示。</li>
-        <li>游戏中可点击「🏳️ 放弃」直接公布答案，或使用「💡 提示」：名字字数、名字第一个字、自动填入一只 ≥ 半数数据吻合的宝可梦（消耗一次竞猜机会）。</li>
+        <li>游戏中可点击「🏳️ 放弃」直接公布答案，或使用一次「💡 提示」（三选一，每局限用一次）：名字字数、名字第一个字、自动填入一只 ≥ 半数数据吻合的宝可梦（消耗一次竞猜机会）。</li>
         <li>最多猜测 <b>8</b> 次，猜中即获胜；未猜中会公布正确答案。</li>
       </ul>
     </section>
