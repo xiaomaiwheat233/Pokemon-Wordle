@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>宝可梦弗一把 · 猜猜我是谁</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="top-inner">
+      <div class="logo">
+        <span class="pokeball">⚪</span>
+        <h1>宝可梦弗一把</h1>
+        <span class="sub">Pokémon Wordle</span>
+      </div>
+      <p class="slogan">猜出宝可梦，最多 8 次机会！</p>
+    </div>
+  </header>
+
+  <main>
+    <!-- 世代选择 + 开始 -->
+    <section class="card setup" id="setup-card">
+      <div class="setup-row">
+        <label class="setup-label">选择世代：</label>
+        <div id="gen-buttons" class="gen-buttons"></div>
+      </div>
+      <div class="setup-row controls">
+        <button id="btn-start" class="btn btn-primary">🎯 开始竞猜</button>
+        <span class="setup-note">开始后将隐藏此面板；游戏中可随时「🏳️ 放弃」或使用「💡 提示」</span>
+      </div>
+    </section>
+
+    <!-- 游戏中控制栏：提示 / 放弃 -->
+    <section class="card game-controls hidden" id="game-controls">
+      <div id="attempt-info" class="attempt-info">剩余次数 <b id="attempt-left">8</b> / 8</div>
+      <div class="controls-right">
+        <div class="hint-wrap">
+          <button id="btn-hint" class="btn btn-hint">💡 提示 <span class="caret">▾</span></button>
+          <div id="hint-menu" class="hint-menu">
+            <button class="hint-item" id="hint-length">🔤 名字字数
+              <span class="hint-item-desc">答案的名字共几个字</span>
+            </button>
+            <button class="hint-item" id="hint-first">🀄 名字第一个字
+              <span class="hint-item-desc">答案名字的第一个字</span>
+            </button>
+            <button class="hint-item" id="hint-fill">🎲 自动填入宝可梦
+              <span class="hint-item-desc">随机填入一只 ≥ 半数数据吻合的宝可梦（消耗一次竞猜）</span>
+            </button>
+          </div>
+        </div>
+        <button id="btn-giveup" class="btn btn-giveup">🏳️ 放弃</button>
+      </div>
+    </section>
+
+    <!-- 神秘宝可梦 + 猜测输入 -->
+    <section class="card play-area">
+      <div class="target-box">
+        <div class="target-img-wrap">
+          <img id="target-img" class="target-img" alt="神秘宝可梦" draggable="false">
+          <div id="target-overlay" class="target-overlay">？</div>
+        </div>
+        <div id="target-status" class="target-status">点击「开始竞猜」抽取目标</div>
+      </div>
+      <div class="guess-box">
+        <div class="guess-label">你的猜测：</div>
+        <div class="guess-input-wrap">
+          <input id="guess-input" type="text" placeholder="输入宝可梦名称（中文或英文）…" autocomplete="off" spellcheck="false" disabled>
+          <div id="suggest-list" class="suggest-list"></div>
+        </div>
+        <div id="hint-info" class="hint-info"></div>
+        <div id="toast" class="toast"></div>
+      </div>
+    </section>
+
+    <!-- 结果横幅 -->
+    <section id="result-banner" class="card result-banner hidden"></section>
+
+    <!-- 猜测反馈表 -->
+    <section class="card table-card">
+      <div class="table-wrap" id="table-wrap">
+        <table id="guess-table">
+          <thead>
+            <tr>
+              <th class="col-poke">宝可梦</th>
+              <th>HP</th>
+              <th>攻击</th>
+              <th>防御</th>
+              <th>特攻</th>
+              <th>特防</th>
+              <th>速度</th>
+              <th>合计</th>
+              <th class="col-type">属性</th>
+              <th>世代</th>
+              <th class="col-ability">特性</th>
+              <th>进化段数</th>
+              <th>Mega</th>
+            </tr>
+          </thead>
+          <tbody id="guess-tbody"></tbody>
+        </table>
+        <div id="empty-hint" class="empty-hint">
+          <span class="empty-emoji">🔍</span>
+          <p>开始竞猜后，每一次猜测都会显示数值反馈：<br>
+          <b>绿色</b> = 正确 · <b>黄色</b> = 接近 · <b>灰色</b> = 不对 · <b>↑</b> 高于答案 · <b>↓</b> 低于答案</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 玩法说明 -->
+    <section class="card legend">
+      <h2>📖 玩法说明</h2>
+      <ul>
+        <li>选择参与的世代（<b>全部</b>或某一世代），点击「开始竞猜」后系统会随机抽取一只宝可梦。</li>
+        <li>在输入框中输入宝可梦名称猜测，系统会逐项给出与答案的对比反馈。</li>
+        <li><span class="badge badge-green">绿色底</span> 该项数据正确（与答案一致）。</li>
+        <li><span class="badge badge-yellow">黄色底</span> 该项数据接近：种族值相差 ≤ 10（合计 ≤ 15）、世代相邻、进化段数相差 1、属性部分相同。</li>
+        <li><span class="badge badge-gray">灰色底</span> 该项数据与答案不同。</li>
+        <li>数值型数据（种族值、世代、进化段数）附 <b>↑</b> 表示你猜的高于答案、<b>↓</b> 表示低于答案。</li>
+        <li>属性按「集合」比较，双属性顺序不影响判断；完全一致为绿色，只中一个为黄色。</li>
+        <li>特性列中「(隐)」表示隐藏特性；与答案拥有任意相同特性即为绿色。</li>
+        <li>目标剪影图不会一开始给出，进行到<b>最后一次竞猜</b>时才会显示。</li>
+        <li>游戏中可点击「🏳️ 放弃」直接公布答案，或使用「💡 提示」：名字字数、名字第一个字、自动填入一只 ≥ 半数数据吻合的宝可梦（消耗一次竞猜机会）。</li>
+        <li>最多猜测 <b>8</b> 次，猜中即获胜；未猜中会公布正确答案。</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    数据来源：pokemon-dataset-zh（宝可梦中文资料库） · 共 1025 只宝可梦（第一至第九世代）
+  </footer>
+
+  <script src="js/pokedex-data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
