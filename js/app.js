@@ -387,6 +387,11 @@
 
   // ---------- 猜测与判定 ----------
   function pickPokemon(entry) {
+    // 对战模式由 duel.js 接管猜测流程，但复用同一个输入框与联想入口。
+    if (window.POKEMON_DUEL && window.POKEMON_DUEL.active) {
+      window.POKEMON_DUEL.submit(entry);
+      return;
+    }
     if (!state.target || state.over) return;
     if (state.guesses.some(function (g) { return g.id === entry.id; })) {
       toast('「' + entry.name + '」已经猜过了！');

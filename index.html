@@ -1,148 +1,29 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>宝可梦弗一把 · 猜猜我是谁</title>
+  <meta name="theme-color" content="#e3350d">
+  <meta name="description" content="宝可梦猜猜看：用属性、种族值和世代反馈猜出目标宝可梦，支持好友房与 Toy 排位。">
+  <title>宝可梦猜猜看 · Pokémon Wordle</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://s1.hdslb.com/bfs/seed/toy/app/sdk/toy-sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/webconnect@0.0.12/dist/umd/webconnect.js"></script>
 </head>
 <body>
-  <header class="top">
-    <div class="top-inner">
-      <div class="logo">
-        <span class="pokeball">⚪</span>
-        <h1>宝可梦弗一把</h1>
-        <span class="sub">Pokémon Wordle</span>
-      </div>
-      <p class="slogan">猜出宝可梦，最多 8 次机会！</p>
-    </div>
-  </header>
-
-  <main>
-    <!-- 世代选择 + 开始 -->
-    <section class="card setup" id="setup-card">
-      <div class="setup-row">
-        <label class="setup-label">选择世代：</label>
-        <div id="gen-buttons" class="gen-buttons"></div>
-      </div>
-      <div class="setup-row">
-        <label class="setup-label">难度模式：</label>
-        <div id="diff-buttons" class="gen-buttons"></div>
-      </div>
-      <div class="setup-row controls">
-        <button id="btn-start" class="btn btn-primary">🎯 开始竞猜</button>
-        <span class="setup-note" id="diff-note"></span>
-      </div>
-    </section>
-
-    <!-- 游戏中控制栏：提示 / 放弃 -->
-    <section class="card game-controls hidden" id="game-controls">
-      <div class="attempt-info">
-        剩余次数 <b id="attempt-left">8</b> / 8
-        <span class="mode-tag" id="mode-tag"></span>
-      </div>
-      <div class="controls-right">
-        <div class="hint-wrap" id="hint-wrap">
-          <button id="btn-hint" class="btn btn-hint">💡 提示 <span class="caret">▾</span></button>
-          <div id="hint-menu" class="hint-menu">
-            <button class="hint-item" id="hint-length">🔤 名字字数
-              <span class="hint-item-desc">答案的名字共几个字</span>
-            </button>
-            <button class="hint-item" id="hint-fields">📋 揭示 3 个词条
-              <span class="hint-item-desc">公布答案的 3 项数据，优先给还未猜中的词条</span>
-            </button>
-            <button class="hint-item" id="hint-fill">🎲 自动填入宝可梦
-              <span class="hint-item-desc">随机填入一只 ≥ 半数数据吻合的宝可梦（消耗一次竞猜）</span>
-            </button>
-            <div class="hint-menu-note">每局限用一次 · 三选一</div>
-          </div>
-        </div>
-        <button id="btn-giveup" class="btn btn-giveup">🏳️ 放弃</button>
-      </div>
-    </section>  
-    <!-- 神秘宝可梦 + 猜测输入 -->
-    <section class="card play-area">
-      <div class="target-box">
-        <div class="target-img-wrap">
-          <img id="target-img" class="target-img hidden" alt="神秘宝可梦" draggable="false">
-          <div id="target-overlay" class="target-overlay">？</div>
-        </div>
-        <div id="target-status" class="target-status">点击「开始竞猜」抽取目标</div>
-      </div>
-      <div class="guess-box">
-        <div class="guess-label">你的猜测：</div>
-        <div class="guess-input-wrap">
-          <input id="guess-input" type="text" placeholder="输入宝可梦名称（中文或英文）…" autocomplete="off" spellcheck="false" disabled>
-          <div id="suggest-list" class="suggest-list"></div>
-        </div>
-        <div id="hint-info" class="hint-info"></div>
-        <div id="toast" class="toast"></div>
-      </div>
-    </section>
-
-    <!-- 结果横幅 -->
+  <div class="bg-shape bg-shape-a"></div><div class="bg-shape bg-shape-b"></div>
+  <header class="hero"><div class="hero-inner"><div class="brand-row"><div class="pokeball pokeball-large" aria-hidden="true"><i></i></div><div><div class="eyebrow">POKÉMON WORDLE</div><h1>宝可梦猜猜看</h1></div><span class="generation-pill">全国图鉴 #001–#1025</span></div><p class="slogan">在 <b>8 次</b>机会内锁定目标宝可梦，看看谁才是训练家的推理王。</p><div class="hero-icons" aria-hidden="true"><span>✦</span><span>◓</span><span>✦</span></div></div></header>
+  <main class="page-shell">
+    <section class="card setup-card" id="setup-card"><div class="section-heading"><span class="section-kicker">READY?</span><h2>准备你的挑战</h2><span class="heading-line"></span></div><div class="setup-grid"><div class="setup-block"><label class="setup-label">题库世代</label><div id="gen-buttons" class="gen-buttons"></div></div><div class="setup-block"><label class="setup-label">难度模式</label><div id="diff-buttons" class="gen-buttons"></div></div></div><div class="setup-actions"><button id="btn-start" class="btn btn-primary">⚡ 开始竞猜</button><span class="setup-note" id="diff-note"></span></div></section>
+    <section class="card game-controls hidden" id="game-controls"><div class="attempt-summary"><span>剩余次数</span><strong id="attempt-left">8</strong><span>/ 8</span><span class="mode-tag" id="mode-tag"></span></div><div class="controls-right"><div class="hint-wrap" id="hint-wrap"><button id="btn-hint" class="btn btn-secondary">💡 提示 <span class="caret">▾</span></button><div id="hint-menu" class="hint-menu"><button class="hint-item" id="hint-length">🔤 名字字数<small>告诉你答案名称的长度</small></button><button class="hint-item" id="hint-fields">🧭 揭示 3 个词条<small>公布目标尚未被你猜中的数据</small></button><button class="hint-item" id="hint-fill">🎯 自动填入匹配项<small>消耗一次竞猜机会</small></button><div class="hint-menu-note">每局限用一次 · 三选一</div></div></div><button id="btn-giveup" class="btn btn-ghost">🏳️ 放弃</button></div></section>
+    <section class="card play-area"><div class="target-box"><div class="target-orbit orbit-one"></div><div class="target-orbit orbit-two"></div><div class="target-img-wrap"><img id="target-img" class="target-img hidden" alt="目标宝可梦" draggable="false"><div id="target-overlay" class="target-overlay">?</div></div><div id="target-status" class="target-status">选择世代后，点击「开始竞猜」抽取目标</div></div><div class="guess-box"><div class="guess-label"><span class="label-dot"></span>输入你的猜测</div><div class="guess-input-row"><div class="guess-input-wrap"><input id="guess-input" type="text" placeholder="输入宝可梦中文名或英文名…" autocomplete="off" spellcheck="false" disabled><div id="suggest-list" class="suggest-list"></div></div><button id="duel-submit-proxy" class="btn btn-submit" type="button">提交</button></div><div class="input-tip">输入名称后从联想列表选择，或按 Enter 提交</div><div id="hint-info" class="hint-info"></div><div id="toast" class="toast"></div></div></section>
     <section id="result-banner" class="card result-banner hidden"></section>
-
-    <!-- 猜测反馈表 -->
-    <section class="card table-card">
-      <div class="table-wrap" id="table-wrap">
-        <table id="guess-table">
-          <thead>
-            <tr>
-              <th class="col-poke">宝可梦</th>
-              <th>HP</th>
-              <th>攻击</th>
-              <th>防御</th>
-              <th>特攻</th>
-              <th>特防</th>
-              <th>速度</th>
-              <th>合计</th>
-              <th class="col-type">属性</th>
-              <th>世代</th>
-              <th class="col-ability">特性</th>
-              <th>进化段数</th>
-              <th>Mega</th>
-            </tr>
-          </thead>
-          <tbody id="guess-tbody"></tbody>
-        </table>
-        <div id="empty-hint" class="empty-hint">
-          <span class="empty-emoji">🔍</span>
-          <p>开始竞猜后，每一次猜测都会显示数值反馈：<br>
-          <b>绿色</b> = 正确 · <b>黄色</b> = 接近 · <b>灰色</b> = 不对 · <b>↑</b> 答案更高 · <b>↓</b> 答案更低</p>
-        </div>
-      </div>
-    </section>
-
-    <!-- 玩法说明 -->
-    <section class="card legend">
-      <h2>📖 玩法说明</h2>
-      <ul>
-        <li>选择参与的世代（<b>全部</b>或某一世代），点击「开始竞猜」后系统会随机抽取一只宝可梦。</li>
-        <li>在输入框中输入宝可梦名称猜测，系统会逐项给出与答案的对比反馈。</li>
-        <li><span class="badge badge-green">绿色底</span> 该项数据正确（与答案一致）。</li>
-        <li><span class="badge badge-yellow">黄色底</span> 该项数据接近：种族值相差 ≤ 10（合计 ≤ 15）、世代相邻、进化段数相差 1、属性部分相同。</li>
-        <li><span class="badge badge-gray">灰色底</span> 该项数据与答案不同。</li>
-        <li>数值型数据（种族值、世代、进化段数）附 <b>↑</b> 表示答案高于你猜的宝可梦、<b>↓</b> 表示答案低于你猜的宝可梦。</li>
-        <li>属性按「集合」比较，双属性顺序不影响判断；完全一致为绿色，只中一个为黄色。</li>
-        <li>特性列中「(隐)」表示隐藏特性；与答案拥有任意相同特性即为绿色。</li>
-        <li><b>难度模式</b>：
-          <b>简单</b> = 保留全部功能（最后一次竞猜给出剪影图 + 可用提示）；
-          <b>普通</b> = 不提供剪影图，仍可用提示；
-          <b>困难</b> = 不提供剪影图，且无法使用提示。</li>
-        <li>简单模式下目标剪影图不会一开始给出，进行到<b>最后一次竞猜</b>时才会显示。</li>
-        <li>游戏中可随时点击「🏳️ 放弃」直接公布答案（各难度均可用）。</li>
-        <li>「💡 提示」三选一、每局限用一次（困难模式不可用）：<b>名字字数</b>、<b>揭示 3 个词条</b>（公布答案的 3 项数据，优先给你还没猜中的词条）、<b>自动填入宝可梦</b>（随机填入一只 ≥ 半数数据吻合的宝可梦，消耗一次竞猜机会）。</li>
-        <li>最多猜测 <b>8</b> 次，猜中即获胜；未猜中会公布正确答案。</li>
-      </ul>
-    </section>
+    <section class="card table-card"><div class="table-head"><div><span class="section-kicker">FEEDBACK</span><h2>猜测记录</h2></div><div class="legend-mini"><span class="legend-dot correct"></span>正确 <span class="legend-dot close"></span>接近 <span class="legend-dot far"></span>不同</div></div><div class="table-wrap" id="table-wrap"><table id="guess-table"><thead><tr><th class="col-poke">宝可梦</th><th>HP</th><th>攻击</th><th>防御</th><th>特攻</th><th>特防</th><th>速度</th><th>合计</th><th class="col-type">属性</th><th>世代</th><th class="col-ability">特性</th><th>进化</th><th>Mega</th></tr></thead><tbody id="guess-tbody"></tbody></table><div id="empty-hint" class="empty-hint"><div class="empty-ball">◓</div><p>开始竞猜后，这里会显示每一次的属性反馈<br><b class="text-green">绿色</b> = 正确　<b class="text-yellow">黄色</b> = 接近　<b class="text-gray">灰色</b> = 不同</p></div></div></section>
+    <section class="card mode-card"><div class="mode-card-main"><span class="pokeball pokeball-small" aria-hidden="true"><i></i></span><div><span class="section-kicker">PLAY TOGETHER</span><h2>和朋友来一场</h2><p>好友房使用 WebConnect 点对点连接；排位对局会同步到 B站 Toy 排行榜。</p></div></div><div class="mode-card-actions"><button id="btn-duel" class="btn btn-primary">👥 双人对战</button><button id="btn-rank" class="btn btn-outline">🏆 排位榜</button><button id="btn-duel-leave" class="btn btn-ghost hidden">退出对战</button></div></section>
+    <section class="card legend"><div class="section-heading"><span class="section-kicker">HOW TO PLAY</span><h2>玩法说明</h2><span class="heading-line"></span></div><ol><li>从全部世代或指定世代中抽取目标，输入宝可梦名称进行猜测。</li><li>数字列会用箭头提示答案更高或更低；属性、特性等会显示吻合程度。</li><li>简单模式最后一次竞猜给出剪影；提示每局限用一次，困难模式不提供提示。</li><li>点击「双人对战」创建或加入好友房；排位采用全图鉴随机题库，先赢两局。</li></ol></section>
   </main>
-
-  <footer class="footer">
-    数据来源：pokemon-dataset-zh（宝可梦中文资料库） · 共 1025 只宝可梦（第一至第九世代）
-  </footer>
-
-  <script src="js/pokedex-data.js"></script>
-  <script src="js/app.js"></script>
-</body>
-</html>
+  <footer class="footer">数据来自 pokemon-dataset-zh · 本页面为个人学习交流项目</footer>
+  <div id="duel-modal-overlay" class="modal-overlay"><div id="duel-modal" class="modal"><div class="modal-head"><div><span class="section-kicker">BATTLE HUB</span><h2>训练家对战中心</h2></div><button class="x-btn" id="duel-close">✕</button></div><div class="duel-wins-row">好友房胜局：<select id="duel-wins"><option>1</option><option selected>3</option><option>5</option></select> 局</div><div class="duel-note" id="duel-scope-note"></div><div class="duel-tabs"><button class="duel-tab active" data-tab="quick">👥 好友房</button><button class="duel-tab" data-tab="ranked">⚔️ 排位</button><button class="duel-tab" data-tab="manual">🔗 手动连接</button></div><div class="duel-tabpane" id="tab-quick"><button class="btn btn-primary" id="duel-create">🏠 创建房间</button><div id="q-host-box" class="hidden"><div class="code-label">把房间码发给好友：</div><div class="room-code" id="q-room-code">------</div><button class="btn btn-outline" id="q-copy-code">复制房间码</button><div class="duel-status" id="q-host-status">等待对手加入…</div></div><div class="join-row"><input id="q-join-code" placeholder="输入好友房间码"><button class="btn btn-secondary" id="duel-join">🚪 加入</button></div><div class="duel-status" id="q-status"></div></div><div class="duel-tabpane hidden" id="tab-ranked"><div class="rank-card"><div class="rank-me"><div><b id="rank-name">尚未登录</b><div class="duel-note">个人排位分 · 胜负 ±25</div></div><span class="rank-score" id="rank-rating">1000</span></div><div class="duel-status" id="rank-my-official">官方榜：尚未查询</div><button class="btn btn-primary" id="rank-match">⚔️ 开始匹配</button><div class="duel-status" id="rank-status">排位使用全图鉴随机题库，先赢两局。</div></div><div class="rank-toolbar"><span>官方排行榜</span><select id="rank-period"><option value="all">总榜</option><option value="month">月榜</option><option value="week">周榜</option><option value="day">日榜</option></select></div><div class="rank-list" id="rank-list"><div class="rank-empty">点击“排位榜”加载</div></div></div><div class="duel-tabpane hidden" id="tab-manual"><div class="manual-box"><b>房主</b><button class="btn btn-primary" id="m-host-gen">生成邀请码</button><textarea id="m-invite" readonly placeholder="邀请码将显示在这里"></textarea><button class="btn btn-outline" id="m-copy-invite">复制邀请码</button><div class="join-row"><input id="m-answer-in" placeholder="粘贴回应码"><button class="btn btn-secondary" id="m-host-done">完成连接</button></div><div class="duel-status" id="m-host-status"></div></div><div class="manual-box"><b>加入者</b><textarea id="m-invite-in" placeholder="粘贴房主邀请码"></textarea><button class="btn btn-secondary" id="m-guest-gen">生成回应码</button><textarea id="m-answer" readonly placeholder="回应码将显示在这里"></textarea><button class="btn btn-outline" id="m-copy-answer">复制回应码</button></div></div><div class="duel-status modal-status" id="duel-status"></div></div></div>
+  <div id="duel-panel" class="card duel-panel hidden"><div><span class="section-kicker">LIVE BATTLE</span><h2 id="duel-mode-label">双人对战</h2></div><div class="duel-score"><b id="duel-score">0 : 0</b><span id="duel-round-label">第 1 局</span></div><div class="opponent-state"><span>对手反馈</span><div id="duel-opp-hits" class="opp-dims"></div><small id="duel-opp-tries">对手尚未出手</small></div></div>
+  <script src="js/pokedex-data.js"></script><script src="js/app.js"></script><script src="js/duel.js"></script>
+</body></html>

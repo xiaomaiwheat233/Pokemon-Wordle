@@ -1,2 +1,4 @@
 /pokemon-dataset-zh-main.zip
 /tools
+.toy-package-*/
+.toy-doctor*.json
