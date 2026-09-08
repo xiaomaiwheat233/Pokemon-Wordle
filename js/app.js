@@ -280,23 +280,29 @@
   }
 
   // ---------- 联想输入 ----------
+  function normalizeSearch(value) {
+    return String(value || '').trim().toLocaleLowerCase('zh-CN');
+  }
+
   function hideSuggest() {
     suggestList.classList.remove('open');
     activeIndex = -1;
   }
 
   function showSuggest(query) {
-    var q = query.trim().toLowerCase();
-    if (!q || !state.target || state.over) { hideSuggest(); return; }
+    var q = normalizeSearch(query);
+    if (!q || input.disabled || state.over) { hideSuggest(); return; }
 
-    var cands = DATA.filter(function (p) {
+    var cands = poolFor(state.genSel).filter(function (p) {
+      var name = normalizeSearch(p.name);
+      var nameEn = normalizeSearch(p.nameEn);
       return p.name.indexOf(q) !== -1 ||
-        p.name.toLowerCase().indexOf(q) !== -1 ||
-        (p.nameEn || '').toLowerCase().indexOf(q) !== -1;
+        name.indexOf(q) !== -1 ||
+        nameEn.indexOf(q) !== -1;
     });
     cands.sort(function (a, b) {
-      var as = a.name.indexOf(q) === 0 || a.nameEn.toLowerCase().indexOf(q) === 0 ? 1 : 0;
-      var bs = b.name.indexOf(q) === 0 || b.nameEn.toLowerCase().indexOf(q) === 0 ? 1 : 0;
+      var as = normalizeSearch(a.name).indexOf(q) === 0 || normalizeSearch(a.nameEn).indexOf(q) === 0 ? 1 : 0;
+      var bs = normalizeSearch(b.name).indexOf(q) === 0 || normalizeSearch(b.nameEn).indexOf(q) === 0 ? 1 : 0;
       return bs - as || a.id - b.id;
     });
     cands = cands.slice(0, 12);
@@ -353,6 +359,8 @@
   }
 
   input.addEventListener('input', function () { showSuggest(input.value); });
+  // 中文输入法组合输入结束后，部分浏览器不会再次触发可用的 input 事件。
+  input.addEventListener('compositionend', function () { showSuggest(input.value); });
   input.addEventListener('focus', function () {
     if (input.value.trim()) showSuggest(input.value);
   });
