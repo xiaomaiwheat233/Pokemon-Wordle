@@ -17,11 +17,6 @@
 
 纯静态页面，无需构建：直接用浏览器打开 `index.html` 即可。页面通过 CDN 加载 B站 Toy SDK 与 `webconnect@0.0.12`；发布到 Toy 时需要网络可用。
 
-## 📦 Toy 打包
-
-上传包应只包含运行所需的 `index.html`、`css/`、`js/` 和宝可梦图片，不要把 `.git`、原始 HTML 数据页或 `node_modules` 放进 ZIP。当前可上传包为 `pokemon-wordle-toy-upload-v10.zip`。
-
-
 ## 📊 数据来源与致谢
 
 宝可梦数据来自 [42arch/pokemon-dataset-zh](https://github.com/42arch/pokemon-dataset-zh)（MIT License，数据整理自[神奇宝贝百科](https://wiki.52poke.com/wiki/主页)）。本仓库 `pokemon-dataset-zh-main/` 目录为其内容的本地副本，其中 `LICENSE` 及版权声明均随附保留。感谢原作者整理的中文图鉴数据集！
